@@ -19,6 +19,7 @@ using Microsoft::WRL::ComPtr;
 Shader* basicShader;
 
 ComPtr<ID3D11Buffer> vertexBuffer;
+ComPtr<ID3D11Buffer> indexBuffer;
 ComPtr<ID3D11InputLayout> inputLayout;
 
 // Game
@@ -57,7 +58,45 @@ void Game::Initialize(HWND window, int width, int height) {
 		basicShader->vsBytecode.data(), basicShader->vsBytecode.size(),
 		inputLayout.ReleaseAndGetAddressOf());
 
-	// TP: allouer vertexBuffer ici
+	{ // VERTEX BUFFER INIT
+		std::vector<float> vbData = {
+			-0.5f,  0.5f, 0.0f,
+			 0.5f, -0.5f, 0.0f,
+			-0.5f, -0.5f, 0.0f,
+			 0.5f,  0.5f, 0.0f
+		};
+		CD3D11_BUFFER_DESC desc(
+			sizeof(float) * vbData.size(),
+			D3D11_BIND_VERTEX_BUFFER
+		);
+		D3D11_SUBRESOURCE_DATA initialData = {};
+		initialData.pSysMem = vbData.data();
+
+		device->CreateBuffer(
+			&desc,
+			&initialData,
+			vertexBuffer.ReleaseAndGetAddressOf()
+		);
+	}
+
+	{ // INDEX BUFFER INIT
+		std::vector<uint32_t> ibData = {
+			 0,  1, 2,
+			 0,  3, 1,
+		};
+		CD3D11_BUFFER_DESC desc(
+			sizeof(uint32_t) * ibData.size(),
+			D3D11_BIND_INDEX_BUFFER
+		);
+		D3D11_SUBRESOURCE_DATA initialData = {};
+		initialData.pSysMem = ibData.data();
+
+		device->CreateBuffer(
+			&desc,
+			&initialData,
+			indexBuffer.ReleaseAndGetAddressOf()
+		);
+	}
 }
 
 void Game::Tick() {
@@ -102,7 +141,13 @@ void Game::Render() {
 
 	basicShader->Apply(m_deviceResources.get());
 
-	// TP: Tracer votre vertex buffer ici
+	ID3D11Buffer* vbs[] = { vertexBuffer.Get() };
+	UINT strides[] = { sizeof(float) * 3 };
+	UINT offsets[] = { 0 };
+	context->IASetVertexBuffers(0, 1, vbs, strides, offsets);
+	context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	context->DrawIndexed(6, 0, 0);
 
 	// envoie nos commandes au GPU pour etre afficher � l'�cran
 	m_deviceResources->Present();
