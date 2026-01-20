@@ -9,6 +9,7 @@
 #include "Engine/Buffer.h"
 #include "Engine/VertexLayout.h"
 #include "Engine/Shader.h"
+#include "Engine/Texture.h"
 #include "Minicraft/Cube.h"
 
 extern void ExitGame() noexcept;
@@ -19,10 +20,12 @@ using namespace DirectX::SimpleMath;
 using Microsoft::WRL::ComPtr;
 
 // Global stuff
-Shader* basicShader;
+Shader basicShader(L"basic");
+Texture terrain(L"terrain");
 
 struct ModelData {
 	Matrix mModel;
+	Vector4 time;
 };
 struct CameraData {
 	Matrix mView;
@@ -41,7 +44,6 @@ Game::Game() noexcept(false) {
 }
 
 Game::~Game() {
-	delete basicShader;
 	g_inputLayouts.clear();
 }
 
@@ -57,8 +59,7 @@ void Game::Initialize(HWND window, int width, int height) {
 	m_deviceResources->CreateDeviceResources();
 	m_deviceResources->CreateWindowSizeDependentResources();
 
-	basicShader = new Shader(L"Basic");
-	basicShader->Create(m_deviceResources.get());
+	basicShader.Create(m_deviceResources.get());
 
 	mProjection = Matrix::CreatePerspectiveFieldOfView(
 		60 * XM_PI / 180.0f,
@@ -69,11 +70,13 @@ void Game::Initialize(HWND window, int width, int height) {
 
 	auto device = m_deviceResources->GetD3DDevice();
 
-	GenerateInputLayout<VertexLayout_PositionUV>(m_deviceResources.get(), basicShader);
+	GenerateInputLayout<VertexLayout_PositionUV>(m_deviceResources.get(), &basicShader);
 
 	cube.Generate(m_deviceResources.get());
 	cbModel.Create(m_deviceResources.get());
 	cbCamera.Create(m_deviceResources.get());
+
+	terrain.Create(m_deviceResources.get());
 }
 
 void Game::Tick() {
@@ -117,7 +120,8 @@ void Game::Render() {
 	
 	ApplyInputLayout<VertexLayout_PositionUV>(m_deviceResources.get());
 
-	basicShader->Apply(m_deviceResources.get());
+	basicShader.Apply(m_deviceResources.get());
+	terrain.Apply(m_deviceResources.get());
 
 	cbModel.ApplyToVS(m_deviceResources.get(), 0);
 	cbCamera.ApplyToVS(m_deviceResources.get(), 1);
