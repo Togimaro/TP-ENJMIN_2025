@@ -17,5 +17,5 @@ public:
 	const Matrix& GetLocalMatrix() const { return mModel; }
 
 private:
-	void PushFace(Vector3 pos, Vector3 up, Vector3 right);
+	void PushFace(Vector3 pos, Vector3 up, Vector3 right, int texId);
 };
