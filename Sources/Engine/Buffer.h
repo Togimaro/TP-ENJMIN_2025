@@ -13,6 +13,7 @@ public:
 	}
 
 	void Create(DeviceResources* deviceRes) {
+		if (data.empty()) return;
 		CD3D11_BUFFER_DESC desc(
 			sizeof(TVertex) * data.size(),
 			D3D11_BIND_VERTEX_BUFFER
@@ -50,6 +51,7 @@ public:
 	}
 
 	void Create(DeviceResources* deviceRes) {
+		if (data.empty()) return;
 		CD3D11_BUFFER_DESC desc(
 			sizeof(uint32_t) * data.size(),
 			D3D11_BIND_INDEX_BUFFER

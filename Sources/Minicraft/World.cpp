@@ -1,11 +1,25 @@
 #include "pch.h"
 
 #include "World.h"
+#include "PerlinNoise.hpp"
 
 using namespace DirectX::SimpleMath;
 
 void World::Generate(DeviceResources* res) {
-	for (int z = 0; z < WORLD_SIZE; z++) {
+	siv::BasicPerlinNoise<float> perlin;
+	const int GLOBAL_SIZE = WORLD_SIZE * Chunk::CHUNK_SIZE;
+	for (int z = 0; z < GLOBAL_SIZE; z++) {
+		for (int y = 0; y < GLOBAL_SIZE; y++) {
+			for (int x = 0; x < GLOBAL_SIZE; x++) {
+				float test = perlin.octave3D_01(x / (float)GLOBAL_SIZE * 0.8f, y / (float)GLOBAL_SIZE * 0.8f, z / (float)GLOBAL_SIZE * 0.8f, 5);
+				if (test >  0.3f && test < 0.6f) {
+					*GetCube(x, y, z) = LOG;
+				}
+			}
+		}
+	}
+
+	/*for (int z = 0; z < WORLD_SIZE; z++) {
 		for (int x = 0; x < WORLD_SIZE; x++) {
 			for (int y = 0; y < 3; y++)
 				SetCube(x, y, z, STONE);
@@ -13,14 +27,13 @@ void World::Generate(DeviceResources* res) {
 				SetCube(x, y, z, DIRT);
 			SetCube(x, 6, z, GRASS);
 		}
-	}
+	}*/
 
 	for (int z = 0; z < WORLD_SIZE; z++) {
 		for (int y = 0; y < WORLD_SIZE; y++) {
 			for (int x = 0; x < WORLD_SIZE; x++) {
-				auto blockId = GetCube(x, y, z);
-				if (blockId == nullptr || *blockId == EMPTY) continue;
-				cubes.emplace_back(Vector3( (float)x, (float)y, (float)z ), *blockId).Generate(res);
+				chunks[x + y * WORLD_SIZE + z * WORLD_SIZE * WORLD_SIZE].SetPosition(this, x, y, z);
+				chunks[x + y * WORLD_SIZE + z * WORLD_SIZE * WORLD_SIZE].Generate(res);
 			}
 		}
 	}
@@ -30,31 +43,39 @@ void World::Generate(DeviceResources* res) {
 void World::Draw(DeviceResources* res) {
 	cbModel.ApplyToVS(res, 0);
 
-	for (auto& cube : cubes) {
-		Matrix model = cube.GetLocalMatrix();
+	for (auto& chunk : chunks) {
+		Matrix model = chunk.GetLocalMatrix();
 		cbModel.data.mModel = model.Transpose();
 		cbModel.Update(res);
-		cube.Draw(res);
+		chunk.Draw(res);
 	}
 }
 
 BlockId* World::GetCube(int gx, int gy, int gz) {
-	if (gx < 0) return nullptr;
-	if (gy < 0) return nullptr;
-	if (gz < 0) return nullptr;
-	if (gx >= WORLD_SIZE) return nullptr;
-	if (gy >= WORLD_SIZE) return nullptr;
-	if (gz >= WORLD_SIZE) return nullptr;
-	return &data[gx + gy * WORLD_SIZE + gz * WORLD_SIZE * WORLD_SIZE];
+	int cx = gx / Chunk::CHUNK_SIZE;
+	int cy = gy / Chunk::CHUNK_SIZE;
+	int cz = gz / Chunk::CHUNK_SIZE;
+	int lx = gx % Chunk::CHUNK_SIZE;
+	int ly = gy % Chunk::CHUNK_SIZE;
+	int lz = gz % Chunk::CHUNK_SIZE;
+
+	if (cx < 0) return nullptr;
+	if (cy < 0) return nullptr;
+	if (cz < 0) return nullptr;
+	if (cx >= WORLD_SIZE) return nullptr;
+	if (cy >= WORLD_SIZE) return nullptr;
+	if (cz >= WORLD_SIZE) return nullptr;
+
+	return chunks[cx + cy * WORLD_SIZE + cz * WORLD_SIZE * WORLD_SIZE].GetChunkCube(lx, ly, lz);
 }
 
 
 void World::SetCube(int gx, int gy, int gz, BlockId id) {
-	if (gx < 0) return;
+	/*if (gx < 0) return;
 	if (gy < 0) return;
 	if (gz < 0) return;
 	if (gx >= WORLD_SIZE) return;
 	if (gy >= WORLD_SIZE) return;
 	if (gz >= WORLD_SIZE) return;
-	data[gx + gy * WORLD_SIZE + gz * WORLD_SIZE * WORLD_SIZE] = id;
+	data[gx + gy * WORLD_SIZE + gz * WORLD_SIZE * WORLD_SIZE] = id;*/
 }

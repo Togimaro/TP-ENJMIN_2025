@@ -2,12 +2,12 @@
 
 #include "Block.h"
 #include "Cube.h"
+#include "Chunk.h"
 #include <array>
 
 class World {
 	constexpr static int WORLD_SIZE = 16;
-	std::array<BlockId, WORLD_SIZE * WORLD_SIZE * WORLD_SIZE> data;
-	std::vector<Cube> cubes;
+	std::array<Chunk, WORLD_SIZE * WORLD_SIZE * WORLD_SIZE> chunks;
 
 	struct CubeData {
 		Matrix mModel;
