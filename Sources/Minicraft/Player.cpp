@@ -118,9 +118,15 @@ void Player::Update(float dt, const Keyboard::State& kb, const Mouse::State& ms)
 	BlockId* block = world->GetCube(position.x, position.y + velocity.y, position.z);
 
 	if (block) {
-		if (*block != EMPTY) {
+		auto& blockData = BlockData::Get(*block);
+		if (!(blockData.flags & BF_NO_PHYSICS)) {
 			velocity.y = 0.0f;
 			position.y -= position.y - round(position.y);
+			if (kbTracker.IsKeyPressed(DirectX::Keyboard::Keys::Space))
+				velocity.y = 0.3f;
+		}
+		if (blockData.flags & BF_GRAVITY_WATER) {
+			velocity.y *= 0.9f;
 			if (kbTracker.IsKeyPressed(DirectX::Keyboard::Keys::Space))
 				velocity.y = 0.3f;
 		}
@@ -132,7 +138,8 @@ void Player::Update(float dt, const Keyboard::State& kb, const Mouse::State& ms)
 		BlockId* block = world->GetCube(colPos.x, colPos.y, colPos.z + 1);
 
 		if (block) {
-			if (*block != EMPTY) {
+			auto& blockData = BlockData::Get(*block);
+			if (!(blockData.flags & BF_NO_PHYSICS)) {
 				if(collisionPoint.z == 0)
 					position.x -= colPos.x - round(colPos.x);
 				else if (collisionPoint.x == 0)
@@ -150,9 +157,13 @@ void Player::Update(float dt, const Keyboard::State& kb, const Mouse::State& ms)
 		auto cubes = Raycast(camera.GetPosition(), camera.Forward(), 5);
 		for (auto& cube : cubes) {
 			BlockId* block = world->GetCube(cube[0], cube[1], cube[2]);
-			if (block && *block != EMPTY) {
+			if (block) {
+				auto& blockData = BlockData::Get(*block);
+
+				if (blockData.flags & BF_NO_RAYCAST)
+					continue;
+
 				world->SetCube(cube[0], cube[1], cube[2], EMPTY);
-				world->regen = true; // TODO remove this
 				break;
 			}
 		}

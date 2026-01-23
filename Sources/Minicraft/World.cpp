@@ -107,6 +107,37 @@ void World::SetCube(int gx, int gy, int gz, BlockId id) {
 	auto cube = GetCube(gx, gy, gz);
 	if (!cube) return;
 	*cube = id;
+	MarkCubeDirty(gx, gy, gz);
+}
+
+Chunk* World::GetChunk(int gx, int gy, int gz) {
+	int cx = gx / Chunk::CHUNK_SIZE;
+	int cy = gy / Chunk::CHUNK_SIZE;
+	int cz = gz / Chunk::CHUNK_SIZE;
+
+	if (cx < 0) return nullptr;
+	if (cy < 0) return nullptr;
+	if (cz < 0) return nullptr;
+	if (cx >= WORLD_SIZE) return nullptr;
+	if (cy >= WORLD_SIZE) return nullptr;
+	if (cz >= WORLD_SIZE) return nullptr;
+
+	return &chunks[cx + cy * WORLD_SIZE + cz * WORLD_SIZE * WORLD_SIZE];
+}
+
+void World::MarkChunkDirty(int gx, int gy, int gz) {
+	Chunk* chunk = GetChunk(gx, gy, gz);
+	if (chunk) chunk->MarkDirty();
+}
+
+void World::MarkCubeDirty(int gx, int gy, int gz) {
+	MarkChunkDirty(gx, gy, gz);
+	MarkChunkDirty(gx + 1, gy, gz);
+	MarkChunkDirty(gx - 1, gy, gz);
+	MarkChunkDirty(gx, gy - 1, gz);
+	MarkChunkDirty(gx, gy + 1, gz);
+	MarkChunkDirty(gx, gy, gz - 1);
+	MarkChunkDirty(gx, gy, gz + 1);
 }
 
 void World::ShowImGui(DeviceResources* res) {

@@ -18,9 +18,11 @@ private:
 	Matrix mModel;
 	World* world;
 	int cx, cy, cz;
+	bool dirty = true;
 public:
 	Chunk() = default;
 
+	void MarkDirty() { dirty = true; }
 	void SetPosition(World* world, int cx, int cy, int cz);
 	void Generate(DeviceResources* deviceRes);
 	void Draw(DeviceResources* deviceRes, ShaderPass pass);

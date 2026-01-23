@@ -23,10 +23,15 @@ using Microsoft::WRL::ComPtr;
 
 // Global stuff
 Shader basicShader(L"basic");
+Shader waterShader(L"water");
 Texture terrain(L"terrain");
 World world;
 Player player;
 
+struct alignas(16) GlobalData {
+	Vector4 times;
+};
+ConstantBuffer<GlobalData> cbGlobal;
 
 Shader lineShader(L"Line");
 VertexBuffer<VertexLayout_PositionColor> debugLine;
@@ -59,6 +64,7 @@ void Game::Initialize(HWND window, int width, int height) {
 	m_deviceResources->CreateWindowSizeDependentResources();
 
 	basicShader.Create(m_deviceResources.get());
+	waterShader.Create(m_deviceResources.get());
 
 	player.GetCamera().UpdateAspectRatio((float)width / (float)height);
 	player.GetCamera().Create(m_deviceResources.get());
@@ -76,6 +82,7 @@ void Game::Initialize(HWND window, int width, int height) {
 	world.Generate();
 	world.CreateMesh(m_deviceResources.get());
 	terrain.Create(m_deviceResources.get());
+	cbGlobal.Create(m_deviceResources.get());
 
 
 	Vector3 pos(20.1, 15.3, 20.2);
@@ -164,18 +171,21 @@ void Game::Render() {
 	
 	ApplyInputLayout<VertexLayout_PositionNormalUV>(m_deviceResources.get());
 
+	cbGlobal.data.times = Vector4(
+		m_timer.GetTotalSeconds(), 0, 0, 0
+	);
+	cbGlobal.Update(m_deviceResources.get());
+	cbGlobal.ApplyToVS(m_deviceResources.get(), 2);
+	cbGlobal.ApplyToPS(m_deviceResources.get(), 2);
+
 	basicShader.Apply(m_deviceResources.get());
 	terrain.Apply(m_deviceResources.get());
 	player.GetCamera().Apply(m_deviceResources.get());
 
-	if (world.regen) {
-		world.CreateMesh(m_deviceResources.get());
-		world.regen = false;
-	}
-
 	context->OMSetBlendState(m_commonStates->Opaque(), NULL, 0xffffffff);
 	world.Draw(m_deviceResources.get(), ShaderPass::SP_OPAQUE);
 	context->OMSetBlendState(m_commonStates->AlphaBlend(), NULL, 0xffffffff);
+	waterShader.Apply(m_deviceResources.get());
 	world.Draw(m_deviceResources.get(), ShaderPass::SP_TRANSPARENT);
 
 
