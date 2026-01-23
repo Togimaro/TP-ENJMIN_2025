@@ -5,6 +5,7 @@
 #include "Block.h"
 #include <array>
 
+using namespace DirectX;
 using namespace DirectX::SimpleMath;
 class World;
 
@@ -15,6 +16,7 @@ private:
 	std::array<BlockId, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE> data;
 	VertexBuffer<VertexLayout_PositionNormalUV> vBuffer[SP_COUNT];
 	IndexBuffer iBuffer[SP_COUNT];
+	BoundingBox bounds;
 	Matrix mModel;
 	World* world;
 	int cx, cy, cz;
@@ -26,6 +28,7 @@ public:
 	void SetPosition(World* world, int cx, int cy, int cz);
 	void Generate(DeviceResources* deviceRes);
 	void Draw(DeviceResources* deviceRes, ShaderPass pass);
+	const BoundingBox& GetBounds() const { return bounds; }
 	const Matrix& GetLocalMatrix() const { return mModel; }
 
 	BlockId* GetChunkCube(int cx, int cy, int cz);

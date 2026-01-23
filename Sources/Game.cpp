@@ -183,10 +183,10 @@ void Game::Render() {
 	player.GetCamera().Apply(m_deviceResources.get());
 
 	context->OMSetBlendState(m_commonStates->Opaque(), NULL, 0xffffffff);
-	world.Draw(m_deviceResources.get(), ShaderPass::SP_OPAQUE);
+	world.Draw(m_deviceResources.get(), &player.GetCamera(), ShaderPass::SP_OPAQUE);
 	context->OMSetBlendState(m_commonStates->AlphaBlend(), NULL, 0xffffffff);
 	waterShader.Apply(m_deviceResources.get());
-	world.Draw(m_deviceResources.get(), ShaderPass::SP_TRANSPARENT);
+	world.Draw(m_deviceResources.get(), &player.GetCamera(), ShaderPass::SP_TRANSPARENT);
 
 
 	context->OMSetBlendState(m_commonStates->Opaque(), NULL, 0xffffffff);

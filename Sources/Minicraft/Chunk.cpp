@@ -4,6 +4,9 @@
 
 void Chunk::SetPosition(World* world, int cx, int cy, int cz) {
 	mModel = Matrix::CreateTranslation(Vector3(cx, cy, cz) * Chunk::CHUNK_SIZE);
+	bounds = BoundingBox(
+		{ cx * CHUNK_SIZE + CHUNK_SIZE / 2.0f, cy * CHUNK_SIZE + CHUNK_SIZE / 2.0f, cz * CHUNK_SIZE + CHUNK_SIZE / 2.0f },
+		{ CHUNK_SIZE / 2.0f, CHUNK_SIZE / 2.0f, CHUNK_SIZE / 2.0f });
 	this->cx = cx;
 	this->cy = cy;
 	this->cz = cz;

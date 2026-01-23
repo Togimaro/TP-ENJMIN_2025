@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "World.h"
+#include "Engine/Camera.h"
 #include "PerlinNoise.hpp"
 
 using namespace DirectX::SimpleMath;
@@ -74,10 +75,13 @@ void World::CreateMesh(DeviceResources * res) {
 	cbModel.Create(res);
 }
 
-void World::Draw(DeviceResources* res, ShaderPass pass) {
+void World::Draw(DeviceResources* res, Camera* camera, ShaderPass pass) {
 	cbModel.ApplyToVS(res, 0);
 
 	for (auto& chunk : chunks) {
+		if (!camera->GetBounds().Intersects(chunk.GetBounds()))
+			continue;
+
 		Matrix model = chunk.GetLocalMatrix();
 		cbModel.data.mModel = model.Transpose();
 		cbModel.Update(res);

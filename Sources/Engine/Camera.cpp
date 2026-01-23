@@ -39,4 +39,7 @@ void Camera::UpdateViewMatrix() {
 		position + forward,
 		up
 	);
+
+	BoundingFrustum::CreateFromMatrix(bounds, proj, true);
+	bounds.Transform(bounds, view.Invert());
 }
