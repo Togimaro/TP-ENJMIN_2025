@@ -85,7 +85,7 @@ void Chunk::PushCube(int lx, int ly, int lz) {
 			scaleY = 0.8f;
 	}
 
-	Vector3 offset = Vector3(lx, ly, lz);
+	Vector3 offset = Vector3(lx, ly, lz + 1); // cf ExplicationOffset.png a la racine du projet!
 	if (ShouldRenderFace(lx, ly, lz, 0, 0, 1)) PushFace(offset + Vector3::Zero, Vector3::Up * scaleY, Vector3::Right, blockData.texIdSide, blockData.pass);
 	if (ShouldRenderFace(lx, ly, lz, 1, 0, 0)) PushFace(offset + Vector3::Right, Vector3::Up * scaleY, Vector3::Forward, blockData.texIdSide, blockData.pass);
 	if (ShouldRenderFace(lx, ly, lz, 0, 0, -1)) PushFace(offset + Vector3::Right + Vector3::Forward, Vector3::Up * scaleY, Vector3::Left, blockData.texIdSide, blockData.pass);

@@ -28,7 +28,7 @@ std::vector<std::array<int, 3>> Raycast(Vector3 pos, Vector3 dir, float maxDista
 			cubes[dist] = {
 				(int)(currentX - ((dir.x < 0) ? 1 : 0)),
 				(int)floor(collision.y),
-				(int)ceil(collision.z)
+				(int)floor(collision.z)
 			};
 			currentX += (dir.x > 0) ? 1 : -1;
 		} while (true);
@@ -52,7 +52,7 @@ std::vector<std::array<int, 3>> Raycast(Vector3 pos, Vector3 dir, float maxDista
 			cubes[dist] = {
 				(int)floor(collision.x),
 				(int)(currentY - ((dir.y < 0) ? 1 : 0)),
-				(int)ceil(collision.z)
+				(int)floor(collision.z)
 			};
 			currentY += (dir.y > 0) ? 1 : -1;
 		} while (true);
@@ -76,7 +76,7 @@ std::vector<std::array<int, 3>> Raycast(Vector3 pos, Vector3 dir, float maxDista
 			cubes[dist] = {
 				(int)floor(collision.x),
 				(int)floor(collision.y),
-				(int)(currentZ - ((dir.z > 0) ? 1 : 0)),
+				(int)(currentZ - ((dir.z < 0) ? 1 : 0)),
 			};
 			currentZ += (dir.z > 0) ? 1 : -1;
 		} while (true);
@@ -135,7 +135,7 @@ void Player::Update(float dt, const Keyboard::State& kb, const Mouse::State& ms)
 	for (auto& collisionPoint : CollisionPoints) {
 		Vector3 colPos = position + velocity + collisionPoint;
 
-		BlockId* block = world->GetCube(colPos.x, colPos.y, colPos.z + 1);
+		BlockId* block = world->GetCube(colPos.x, colPos.y, colPos.z);
 
 		if (block) {
 			auto& blockData = BlockData::Get(*block);

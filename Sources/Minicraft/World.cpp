@@ -35,7 +35,8 @@ void World::Generate() {
 			}
 
 			if ((yDirt + 1) < waterHeight) {
-				for (int y = yDirt; y < waterHeight; y++) {
+				SetCube(x, yDirt, z, DIRT); // on mets tout de meme un bloc de dirt pour ne pas faire un trop gros saut dans la generation
+				for (int y = yDirt+1; y < waterHeight; y++) {
 					SetCube(x, y, z, WATER);
 				}
 			}

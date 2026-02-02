@@ -8,7 +8,7 @@
 class Camera;
 
 class World {
-	constexpr static int WORLD_SIZE = 64;
+	constexpr static int WORLD_SIZE = 16;
 	std::array<Chunk, WORLD_SIZE * WORLD_SIZE * WORLD_SIZE> chunks;
 
 	struct CubeData {
